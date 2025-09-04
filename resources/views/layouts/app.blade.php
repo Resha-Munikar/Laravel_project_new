@@ -15,6 +15,7 @@
     }
 </script>
 </head>
+
 <body class="bg-gray-200 dark:bg-gray-600">
     <nav class="bg-white border-gray-200 dark:bg-gray-900">
 <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -100,6 +101,35 @@ themeToggleBtn.addEventListener('click', function() {
 });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+<script>
+    function showNotification(message, type='success') {
+        const container = document.getElementById('notification-container');
+
+        const notification = document.createElement('div');
+        // Style based on type
+        let bgColor = 'bg-green-500';
+        let textColor = 'text-white';
+
+        if (type === 'error') {
+            bgColor = 'bg-red-500';
+        }
+
+        notification.className = `${bgColor} ${textColor} px-4 py-3 rounded shadow-md mb-2 max-w-sm w-full`;
+        notification.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 font-bold">&times;</button>
+            </div>
+        `;
+
+        container.appendChild(notification);
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+</script>
 
 </body>
 </html>
