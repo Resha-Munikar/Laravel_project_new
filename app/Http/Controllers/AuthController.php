@@ -15,17 +15,32 @@ class AuthController extends Controller
     public function register(Request $request){
         $request->validate([
             'name'=>'required|string|max:255',
-            'email'=>'required|string|email|max:255|unique:users',
+            'email'=>'required|email|unique:users,email',
             'password'=>'required|string|min:8|confirmed'
         ]);
-        $user = User::create([
+        $user=User::create([
             'name'=>$request->name,
             'email'=>$request->email,
             'password'=>bcrypt($request->password)
         ]);
-        FacadesAuth::login($user);
-        return redirect()->route('chirps.index')->with('success', 'Registration successful!');
-        
+    FacadesAuth::login($user);
+    return redirect()->route('chirps.index');
     }
-    
+    public function showLoginForm(){
+        return view('auth.login');
+    }
+    public function login(Request $request){
+        $credentials=$request->validate([
+            'email'=>'required|string|email',
+            'password'=>'required|string|min:8'
+        ]);
+        if(FacadesAuth::attempt($credentials)){ 
+            $request->session()->regenerate();
+            return redirect()->intended(route('chirps.index'));
+        }
+        return back()->withErrors([
+            'email'=>'The provided credentials do not match our records.'
+        ])->onlyInput('email');
+
+}
 }
