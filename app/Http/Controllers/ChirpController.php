@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Chirp;
 use App\Models\User;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 
 class ChirpController extends Controller
 {
     public function index(){
         $chirps=Chirp::latest()->get();
-        $user = User::first();
+        $user = FacadesAuth::user();
         return view('chirps.index',compact('chirps','user'));
     }
 
