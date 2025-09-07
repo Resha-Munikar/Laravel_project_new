@@ -17,6 +17,14 @@ Route::middleware('auth')->group(function(){
     Route::delete('/chirps/{id}', [ChirpController::class, 'destroy'])->name('chirps.destroy');
 });
 
+Route::middleware('auth','admin')->group(function(){
+    Route::get('/admin/chirps', [ChirpController::class, 'adminIndex'])->name('chirps.adminIndex');
+    Route::post('/admin/chirps', [ChirpController::class, 'adminSrore'])->name('chirps.adminSrore');
+    Route::get('/admin/chirps/{id}/edit', [ChirpController::class, 'adminEdit'])->name('chirps.adminEdit');
+    Route::put('/admin/chirps/{id}', [ChirpController::class, 'adminUpdate'])->name('chirps.adminUpdate');
+    Route::delete('/admin/chirps/{id}', [ChirpController::class, 'adminDestroy'])->name('chirps.adminDestroy');
+});
+
 Route::get('/register',[AuthController::class,'showRegistrationForm'])->name('register.form');
 Route::post('/register',[AuthController::class,'register'])->name('register');
 Route::get('/login',[AuthController::class,'showLoginForm'])->name('login.form');

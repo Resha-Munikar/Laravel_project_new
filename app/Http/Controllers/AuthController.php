@@ -3,47 +3,62 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function showRegistrationForm(){
+    public function showRegistrationForm()
+    {
         return view('auth.register');
     }
-    public function register(Request $request){
+
+    public function register(Request $request)
+    {
         $request->validate([
-            'name'=>'required|string|max:255',
-            'email'=>'required|email|unique:users,email',
-            'password'=>'required|string|min:8|confirmed'
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
         ]);
-        $user=User::create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password'=>bcrypt($request->password)
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
         ]);
-    FacadesAuth::login($user);
-    return redirect()->route('chirps.index');
+
+        Auth::login($user);
+
+        return redirect()->route('chirps.index');
     }
-    public function showLoginForm(){
+
+    public function showLoginForm() {
         return view('auth.login');
     }
-    public function login(Request $request){
-        $credentials=$request->validate([
-            'email'=>'required|string|email',
-            'password'=>'required|string|min:8'
+
+    public function login(Request $request) {
+        $credential = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
         ]);
-        if(FacadesAuth::attempt($credentials)){ 
+
+        if (Auth::attempt($credential)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('chirps.index'));
+
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('chirps.adminIndex');
+            }
+            return redirect()->route('chirps.index');
+        } else {
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])->onlyInput('email');
         }
-        return back()->withErrors([
-            'email'=>'The provided credentials do not match our records.'
-        ])->onlyInput('email');
     }
-    public function logout(Request $request){
-        FacadesAuth::logout();
+
+    public function logout(Request $request) {
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login.form');
